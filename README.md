@@ -14,10 +14,9 @@ Convert every `.txt` file in a folder into a `.pdf` file.
 The PDFs are saved next to the `.txt` files. Windows SmartScreen may warn about
 an unrecognised app the first time; click **More info → Run anyway**.
 
-To build a new release, push a tag such as `v1.0.1`; the
-`Build Windows exe` GitHub Actions workflow builds the exe and attaches it to
-the release. It can also be run manually from the Actions tab (the exe is then
-available as a build artifact).
+To build a new release, either push a tag such as `v1.0.1`, or open the
+**Actions** tab, pick **Build Windows exe → Run workflow**, and enter a version.
+The workflow builds the exe, smoke-tests it, and attaches it to the release.
 
 ## Running with Python
 
