@@ -2,13 +2,32 @@
 
 Convert every `.txt` file in a folder into a `.pdf` file.
 
-## Setup
+## Windows .exe (no Python needed)
+
+1. Go to the repository's **Releases** page and download `txt2pdf.exe`.
+2. Either:
+   - **Double-click** `txt2pdf.exe` and choose a folder in the window that opens, or
+   - **Drag a folder** onto `txt2pdf.exe`, or
+   - run it from a command prompt: `txt2pdf.exe C:\path\to\folder -r -o C:\pdfs`
+     (same options as below).
+
+The PDFs are saved next to the `.txt` files. Windows SmartScreen may warn about
+an unrecognised app the first time; click **More info → Run anyway**.
+
+To build a new release, push a tag such as `v1.0.1`; the
+`Build Windows exe` GitHub Actions workflow builds the exe and attaches it to
+the release. It can also be run manually from the Actions tab (the exe is then
+available as a build artifact).
+
+## Running with Python
+
+### Setup
 
 ```bash
 pip install -r requirements.txt
 ```
 
-## Usage
+### Usage
 
 ```bash
 python txt2pdf.py path/to/folder

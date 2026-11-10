@@ -2,10 +2,12 @@
 """Convert every .txt file in a folder into a .pdf file.
 
 Usage:
-    python txt2pdf.py INPUT_DIR [-o OUTPUT_DIR] [-r] [--font-size 10] [--page-size letter|a4]
+    python txt2pdf.py [INPUT_DIR] [-o OUTPUT_DIR] [-r] [--font-size 10] [--page-size letter|a4]
 
 Each ``name.txt`` becomes ``name.pdf``. By default PDFs are written next to
 the source files; use ``-o`` to write them to another folder instead.
+If INPUT_DIR is omitted (e.g. the .exe is double-clicked), a folder picker
+is shown.
 """
 
 import argparse
@@ -113,9 +115,37 @@ def txt_to_pdf(src, dest, font, font_size=10, page_size=letter, margin=0.75 * in
     c.save()
 
 
+def ask_for_folder():
+    """Ask the user to pick a folder (GUI dialog, falling back to a prompt)."""
+    try:
+        import tkinter
+        from tkinter import filedialog
+
+        root = tkinter.Tk()
+        root.withdraw()
+        root.attributes("-topmost", True)
+        folder = filedialog.askdirectory(title="Choose a folder of .txt files to convert")
+        root.destroy()
+        if folder:
+            return Path(folder)
+    except Exception:
+        pass
+    try:
+        folder = input("Folder containing .txt files: ").strip().strip('"')
+    except EOFError:
+        folder = ""
+    return Path(folder) if folder else None
+
+
+def should_pause():
+    """Keep the console window open when the .exe was double-clicked or a
+    folder was dragged onto it (i.e. frozen and no command-line options)."""
+    return getattr(sys, "frozen", False) and not any(a.startswith("-") for a in sys.argv[1:])
+
+
 def main():
     parser = argparse.ArgumentParser(description="Convert a folder of .txt files to .pdf files.")
-    parser.add_argument("input_dir", type=Path, help="folder containing .txt files")
+    parser.add_argument("input_dir", type=Path, nargs="?", help="folder containing .txt files (asked for if omitted)")
     parser.add_argument("-o", "--output-dir", type=Path, help="folder for the PDFs (default: same as input)")
     parser.add_argument("-r", "--recursive", action="store_true", help="also convert .txt files in subfolders")
     parser.add_argument("--font-size", type=float, default=10, help="font size in points (default: 10)")
@@ -124,6 +154,11 @@ def main():
     parser.add_argument("--overwrite", action="store_true", help="overwrite PDFs that already exist")
     args = parser.parse_args()
 
+    if args.input_dir is None:
+        args.input_dir = ask_for_folder()
+        if args.input_dir is None:
+            print("No folder chosen.")
+            return 1
     if not args.input_dir.is_dir():
         parser.error(f"{args.input_dir} is not a folder")
 
@@ -156,4 +191,10 @@ def main():
 
 
 if __name__ == "__main__":
-    sys.exit(main())
+    try:
+        code = main()
+    except SystemExit as exc:
+        code = exc.code
+    if should_pause():
+        input("\nPress Enter to close...")
+    sys.exit(code)
